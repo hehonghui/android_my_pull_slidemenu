@@ -44,7 +44,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.uit.slidemenu.MenuView.OnSlideMenuListener;
 
 /**
  * @author mrsimple
@@ -144,7 +145,9 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "textview click", Toast.LENGTH_SHORT).show();
+                if (mLeftLvParams.leftMargin == 0) {
+                    hideMenuView(-mLeftLvParams.width);
+                }
             }
         });
         mContentView.setTextSize(30f);
@@ -162,7 +165,7 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         if (changed) {
             mLeftLvParams = (MarginLayoutParams) mMenuView.getLayoutParams();
             // hide the menu view
-            mLeftLvParams.width = (int) (mScreenWidth * 0.8f);
+            mLeftLvParams.width = (int) (mScreenWidth * 0.6f);
             mLeftLvParams.leftMargin = -mLeftLvParams.width;
             mMenuView.setLayoutParams(mLeftLvParams);
 
@@ -171,10 +174,25 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     }
 
     /**
+     * @param listener
+     */
+    public void setOnSlideMenuListener(OnSlideMenuListener listener) {
+        mMenuView.mSlideMenuListener = listener;
+    }
+
+    /**
      * @param item
      */
     public void addMenuItem(MenuItem item) {
         mMenuView.addMenuItem(item);
+    }
+
+    /**
+     * 
+     */
+    private void hideMenuView(int leftMargin) {
+        mLeftLvParams.leftMargin = leftMargin;
+        mMenuView.setLayoutParams(mLeftLvParams);
     }
 
     int xDown;
@@ -191,11 +209,10 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                 int distance = (int) (event.getRawX() - xDown);
                 if (Math.abs(distance) > mTouchSlop) {
                     if (mLeftLvParams.leftMargin < mLeftMarginEdge) {
-                        mLeftLvParams.leftMargin = mLeftMarginEdge;
+                        hideMenuView(0);
                     } else if (mLeftLvParams.leftMargin == 0 && distance < 0) {
-                        mLeftLvParams.leftMargin = -mLeftLvParams.width;
+                        hideMenuView(-mLeftLvParams.width);
                     }
-                    mMenuView.setLayoutParams(mLeftLvParams);
                 }
                 break;
 

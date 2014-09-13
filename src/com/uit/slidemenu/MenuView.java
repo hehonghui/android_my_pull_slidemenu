@@ -58,6 +58,11 @@ public class MenuView extends RelativeLayout {
     private List<MenuItem> mMenuItems = new ArrayList<MenuItem>();
 
     /**
+     * 
+     */
+    OnSlideMenuListener mSlideMenuListener;
+
+    /**
      * @param context
      */
     public MenuView(Context context) {
@@ -116,6 +121,21 @@ public class MenuView extends RelativeLayout {
     public void setOnTouchListener(OnTouchListener l) {
         super.setOnTouchListener(l);
         mListView.setOnTouchListener(l);
+    }
+
+    /**
+     * @author mrsimple
+     */
+    public static interface OnSlideMenuListener {
+        /**
+         * 
+         */
+        public void onOpen();
+
+        /**
+         * 
+         */
+        public void onClose();
     }
 
     /**
