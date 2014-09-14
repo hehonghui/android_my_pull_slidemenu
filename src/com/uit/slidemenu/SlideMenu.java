@@ -83,8 +83,6 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
 
     protected int mTouchSlop;
 
-    private static final int STATUS_SCROLLING = 0;
-
     private static final int STATUS_MENU_SHOW = 1;
 
     private static final int STATUS_MENU_HIDE = 2;
@@ -256,7 +254,6 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                     // changeMenuViewMargin(yDistance);
                     // }
                     adjustMenuMargin(yDistance);
-                    mMenuStatus = STATUS_SCROLLING;
                     // changeMenuViewMargin(yDistance);
                 }
 
@@ -271,17 +268,19 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                     if (Math.abs(curLeftMargin) < (mMenuWidth / 2)
                             && curLeftMargin != 0) {
                         targetMargin = 0;
-                        // changeMenuViewMarginAsync(0);
                     } else if (Math.abs(curLeftMargin) > (mMenuWidth / 2)
                             && curLeftMargin != -mMenuWidth) {
-                        // changeMenuViewMarginAsync(-mMenuWidth);
                         targetMargin = -mMenuWidth;
                     }
                 } else if (curLeftMargin == 0 && yDistance < 0) {
-                    // changeMenuViewMarginAsync(-mMenuWidth);
                     targetMargin = -mMenuWidth;
                 }
 
+                Log.d(VIEW_LOG_TAG, "### left margin = " + curLeftMargin + ", (mMenuWidth / 2) = "
+                        + (mMenuWidth / 2));
+                if (targetMargin == 0 && yDistance < 0 && mMenuStatus != STATUS_MENU_SHOW) {
+                    return false;
+                }
                 changeMenuViewMarginAsync(targetMargin);
                 changeStatus(targetMargin);
                 // 在这里进行处理
