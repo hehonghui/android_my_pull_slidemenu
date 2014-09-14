@@ -268,32 +268,30 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                 if (Math.abs(yDistance) > mTouchSlop) {
                     adjustMenuMargin(yDistance);
                 }
-
                 break;
 
             case MotionEvent.ACTION_UP:
                 int curLeftMargin = mLeftLvParams.leftMargin;
                 int targetMargin = 0;
                 int changeSlop = mMenuWidth / 3;
-
-                if (Math.abs(yDistance) > changeSlop) {
-                    if (yDistance > mTouchSlop) {
+                int absDistance = Math.abs(yDistance);
+                //
+                if (curLeftMargin < 0 && curLeftMargin > -mMenuWidth) {
+                    if (yDistance > mTouchSlop && absDistance >= changeSlop) {
                         targetMargin = 0;
                     } else {
                         targetMargin = -mMenuWidth;
                     }
-                } else {
-                    targetMargin = 0;
+                } else if (curLeftMargin == 0 && yDistance < 0) {
+                    targetMargin = -mMenuWidth;
                 }
 
-                Log.d(VIEW_LOG_TAG, "### left margin = " + curLeftMargin + ", (mMenuWidth / 2) = "
-                        + (mMenuWidth / 2));
                 if (targetMargin == 0 && yDistance < 0 && mMenuStatus != STATUS_MENU_SHOW) {
                     return false;
                 }
                 changeMenuViewMarginAsync(targetMargin);
                 changeStatus(targetMargin);
-
+                // 在这里进行处理
                 break;
             default:
                 break;
