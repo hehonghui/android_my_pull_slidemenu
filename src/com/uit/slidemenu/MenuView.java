@@ -117,12 +117,6 @@ public class MenuView extends RelativeLayout {
 
     }
 
-    @Override
-    public void setOnTouchListener(OnTouchListener l) {
-        super.setOnTouchListener(l);
-        mListView.setOnTouchListener(l);
-    }
-
     /**
      * @author mrsimple
      */
