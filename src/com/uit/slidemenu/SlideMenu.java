@@ -63,28 +63,38 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     /**
      * 
      */
-    private MarginLayoutParams mLeftLvParams;
+    private MarginLayoutParams mLeftMenuParams;
     /**
-     * 
+     * 菜单的右边界
      */
-    protected int mLeftMarginEdge = 0;
-
+    protected int mLeftMarginRightEdge = 0;
+    /**
+     * 菜单的宽度, 将会设置为屏幕宽度的60%
+     */
     private int mMenuWidth = 0;
     /**
-     * // *
+     * 内容视图
      */
     private TextView mContentView;
     /**
      * 
      */
-    MarginLayoutParams mContentLayoutParams;
-
+    MarginLayoutParams mContentLyParams;
+    /**
+     * 触摸滑动阀值
+     */
     protected int mTouchSlop;
-
+    /**
+     * 
+     */
     private static final int STATUS_MENU_SHOW = 1;
-
+    /**
+     * 
+     */
     private static final int STATUS_MENU_HIDE = 2;
-
+    /**
+     * 
+     */
     private static final int STATUS_MENU_SCROLLING = 3;
     /**
      * 
@@ -95,6 +105,15 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
      * 
      */
     private OnSlideMenuListener mSlideMenuListener;
+
+    /**
+     * 
+     */
+    private int xDown;
+    /**
+     * 
+     */
+    private int xDistance;
 
     /**
      * @param context
@@ -136,18 +155,18 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
 
                     @Override
                     public void onGlobalLayout() {
-                        mLeftLvParams = (MarginLayoutParams) mMenuView.getLayoutParams();
-                        mLeftLvParams.width = (int) (mScreenWidth * 0.6f);
+                        mLeftMenuParams = (MarginLayoutParams) mMenuView.getLayoutParams();
+                        mLeftMenuParams.width = (int) (mScreenWidth * 0.6f);
                         // hide the menu view
-                        mLeftLvParams.leftMargin = -mLeftLvParams.width;
-                        mMenuView.setLayoutParams(mLeftLvParams);
+                        mLeftMenuParams.leftMargin = -mLeftMenuParams.width;
+                        mMenuView.setLayoutParams(mLeftMenuParams);
 
-                        mMenuWidth = mLeftLvParams.width;
+                        mMenuWidth = mLeftMenuParams.width;
                         Log.d(VIEW_LOG_TAG, "### screen width = " + mScreenWidth);
 
                         //
-                        mContentLayoutParams = (MarginLayoutParams) mContentView.getLayoutParams();
-                        mContentLayoutParams.width = mScreenWidth;
+                        mContentLyParams = (MarginLayoutParams) mContentView.getLayoutParams();
+                        mContentLyParams.width = mScreenWidth;
                         //
                         SlideMenu.this.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     }
@@ -163,15 +182,6 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         layoutParams.width = mScreenWidth;
         mContentView.setText("这是Content View ");
         mContentView.setGravity(Gravity.CENTER);
-        mContentView.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (mLeftLvParams.leftMargin == 0 && mMenuStatus == STATUS_MENU_SHOW) {
-                    // changeMenuViewMarginAsync(-mMenuWidth);
-                }
-            }
-        });
         mContentView.setTextSize(30f);
         layoutParams.addRule(RelativeLayout.RIGHT_OF, mMenuView.getId());
         mContentView.setBackgroundColor(Color.CYAN);
@@ -201,79 +211,11 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     }
 
     /**
-     * @param xOffset
-     */
-    protected void adjustMenuMargin(int xOffset) {
-
-        //
-        int curLeftMargin = mLeftLvParams.leftMargin;
-        //
-        int contentRightMargin = mContentLayoutParams.rightMargin;
-        Log.d(VIEW_LOG_TAG, "### curLeftMargin = " + curLeftMargin + ", contentRightMargin = "
-                + contentRightMargin + ", xOffet = "
-                + xOffset);
-        //
-        if ((curLeftMargin == 0 && xOffset > 0)
-                || (curLeftMargin == -mMenuWidth && xOffset < 0)) {
-            Log.d(VIEW_LOG_TAG, "### adjustMenuMargin return ");
-            return;
-        }
-
-        int newLeftMargin = -mMenuWidth;
-        // 计算新的left margin值
-        if (xOffset > 0 && mLeftLvParams.leftMargin < 0) {
-
-            if (mLeftLvParams.leftMargin > -100 && xOffset < 200
-                    && mContentLayoutParams.rightMargin < -400) {
-                return;
-            }
-            // left menu move to content region
-            newLeftMargin += xOffset;
-            // Content View move to right
-            contentRightMargin = -xOffset;
-        } else if (xOffset < 0 && curLeftMargin > -mMenuWidth) {
-            newLeftMargin = xOffset;
-            Log.d(VIEW_LOG_TAG, "### 1  : contentRightMargin = " + contentRightMargin
-                    + ", xOffset " + (xOffset));
-            //
-            // contentRightMargin += -xOffset;
-            contentRightMargin = -mMenuWidth - newLeftMargin;
-            Log.d(VIEW_LOG_TAG, "### 2  : contentRightMargin = " + contentRightMargin
-                    + ", -xOffset " + (-xOffset));
-        }
-
-        // 确保阀值
-        if (newLeftMargin > 0) {
-            newLeftMargin = 0;
-        } else if (newLeftMargin < -mMenuWidth) {
-            newLeftMargin = -mMenuWidth;
-        }
-
-        if (contentRightMargin < -mMenuWidth) {
-            contentRightMargin = -mMenuWidth;
-        } else if (contentRightMargin > 0) {
-            contentRightMargin = 0;
-        }
-
-        //
-        mLeftLvParams.leftMargin = newLeftMargin;
-        mMenuView.setLayoutParams(mLeftLvParams);
-
-        //
-        mContentLayoutParams.rightMargin = contentRightMargin;
-        mContentView.setLayoutParams(mContentLayoutParams);
-        // Log.d(VIEW_LOG_TAG, "### mLeftLvParams left margin = " +
-        // mLeftLvParams.leftMargin
-        // + ", right margin = " + mContentLayoutParams.rightMargin
-        // );
-    }
-
-    /**
      * @param distance 从右向左滑动, 此时 distance 为负数
      */
     private void scrollToLeft(int distance) {
 
-        if (mLeftLvParams.leftMargin == -mMenuWidth || mContentLayoutParams.rightMargin == 0) {
+        if (mLeftMenuParams.leftMargin == -mMenuWidth || mContentLyParams.rightMargin == 0) {
             return;
         }
         int menuLeftMargin = distance;
@@ -288,7 +230,8 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
      */
     private void scrollToRight(int distance) {
 
-        if (mContentLayoutParams.leftMargin == -mMenuWidth || mLeftLvParams.leftMargin == 0) {
+        if (mContentLyParams.leftMargin == -mMenuWidth || mLeftMenuParams.leftMargin == 0
+                || isInvalidData(distance)) {
             return;
         }
         int menuLeftMargin = -mMenuWidth + distance;
@@ -299,13 +242,25 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     }
 
     /**
-     * 无效的滑动
+     * 无效的滑动, 例如当菜单为完全显示的状态下，此时 menu left margin = 0。我们先从 x = 600的坐标点按下，然后向左滑动到
+     * x = 400, 此时再向右滑动到 x = 600，在 x刚小于600的时刻，例如 x = 599, 此时 distance = -1, 因此
+     * menu left margin = -1，即将近完全显示的状态。现在继续向右滑动，超过 x = 600 ( 实际上需要超过 600 +
+     * mTouchSlop 的坐标才行 )，此时 distance = x - 600, 例如distance = 16, 此时 menu left
+     * margin 会迅速的从 -1 到 -mMenuWidth + distance,
+     * 即菜单将近因此的状态。因此在这个节点会出现跳跃。该方法就是判断是否是这种情况的。
      * 
      * @param distance
      * @return
      */
     private boolean isInvalidData(int distance) {
-         return false ;
+        /**
+         * if (mLeftLvParams.leftMargin > -100 && xOffset < 200 &&
+         * mContentLayoutParams.rightMargin < -400) { return; }
+         */
+        int menuLeftMargin = mLeftMenuParams.leftMargin;
+        // 误差值
+        int errRange = 20;
+        return -mMenuWidth + distance + errRange < menuLeftMargin;
     }
 
     /**
@@ -326,19 +281,16 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
             contentLeftMargin = -mMenuWidth;
         }
 
-        mLeftLvParams.leftMargin = menuLeftMargin;
-        mMenuView.setLayoutParams(mLeftLvParams);
+        mLeftMenuParams.leftMargin = menuLeftMargin;
+        mMenuView.setLayoutParams(mLeftMenuParams);
 
         //
-        mContentLayoutParams.rightMargin = contentLeftMargin;
-        mContentView.setLayoutParams(mContentLayoutParams);
+        mContentLyParams.rightMargin = contentLeftMargin;
+        mContentView.setLayoutParams(mContentLyParams);
 
-        Log.d(VIEW_LOG_TAG, "###  mLeftLvParams.leftMargin = " + mLeftLvParams.leftMargin
-                + ",  mContentLayoutParams.rightMargin = " + mContentLayoutParams.rightMargin);
+        Log.d(VIEW_LOG_TAG, "###  mLeftLvParams.leftMargin = " + mLeftMenuParams.leftMargin
+                + ",  mContentLayoutParams.rightMargin = " + mContentLyParams.rightMargin);
     }
-
-    int xDown;
-    int xDistance;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -354,7 +306,7 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                     return true;
                 }
                 // 滑动阀值
-                if (Math.abs(xDistance) > mTouchSlop) {
+                if (Math.abs(xDistance) >= mTouchSlop) {
                     // adjustMenuMargin(xDistance);
                     if (xDistance > 0) {
                         scrollToRight(xDistance);
@@ -365,7 +317,7 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_UP:
-                int curLeftMargin = mLeftLvParams.leftMargin;
+                int curLeftMargin = mLeftMenuParams.leftMargin;
                 int targetMargin = -1;
                 int changeSlop = mMenuWidth / 3;
                 int absDistance = Math.abs(xDistance);
@@ -387,17 +339,12 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                 } else if (targetMargin == -1 && curLeftMargin == -mMenuWidth) {
                     targetMargin = -mMenuWidth;
                 }
-                // changeStatus(targetMargin);
-                // if (targetMargin == -1 && yDistance < 0 && mMenuStatus !=
-                // STATUS_MENU_SHOW
-                // || curLeftMargin == 0) {
-                // return false;
-                // }
+
                 if (targetMargin == -1 && xDistance < 0 && mMenuStatus != STATUS_MENU_SHOW) {
                     return false;
                 }
+                // 对菜单和 content 的 margin 进行处理的异步任务
                 changeMenuViewMarginAsync(targetMargin);
-                // 在这里进行处理
                 break;
             default:
                 break;
@@ -408,20 +355,15 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     /**
      * 
      */
-    // private void changeStatus(int targetMargin) {
-    // if (targetMargin == 0) {
-    // mMenuStatus = STATUS_MENU_SHOW;
-    // } else if (targetMargin == -mMenuWidth) {
-    // mMenuStatus = STATUS_MENU_HIDE;
-    // }
-    // }
-
     public void showMenu() {
         if (mMenuStatus != STATUS_MENU_SHOW) {
-            changeMenuViewMarginAsync(mLeftMarginEdge);
+            changeMenuViewMarginAsync(mLeftMarginRightEdge);
         }
     }
 
+    /**
+     * 
+     */
     public void hideMenu() {
         if (mMenuStatus != STATUS_MENU_HIDE) {
             changeMenuViewMarginAsync(-mMenuWidth);
@@ -434,8 +376,8 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     class MenuViewAsyncTask extends AsyncTask<Integer, MarginPair, Void> {
 
         int mTargetMargin = 0;
-        int mOldLeftMargin = mLeftLvParams.leftMargin;
-        int mOldRightMargin = mContentLayoutParams.rightMargin;
+        int mOldLeftMargin = mLeftMenuParams.leftMargin;
+        int mOldRightMargin = mContentLyParams.rightMargin;
         //
         MarginPair marginPair = new MarginPair();
 
@@ -480,15 +422,15 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         @Override
         protected void onProgressUpdate(MarginPair... values) {
 
-            mLeftLvParams.leftMargin = marginPair.menuLeftMargin;
-            mMenuView.setLayoutParams(mLeftLvParams);
+            mLeftMenuParams.leftMargin = marginPair.menuLeftMargin;
+            mMenuView.setLayoutParams(mLeftMenuParams);
 
-            mContentLayoutParams.rightMargin = marginPair.contenteRightMargin;
-            mContentView.setLayoutParams(mContentLayoutParams);
+            mContentLyParams.rightMargin = marginPair.contenteRightMargin;
+            mContentView.setLayoutParams(mContentLyParams);
 
             Log.d(VIEW_LOG_TAG, "@@@ value[0]" + values[0] + ", mTarget = " + mTargetMargin
                     + ", mOldLeftMargin = " + mOldLeftMargin
-                    + ", mContentLayoutParams.rightMargin = " + mContentLayoutParams.rightMargin);
+                    + ", mContentLayoutParams.rightMargin = " + mContentLyParams.rightMargin);
         }
 
         @Override
@@ -502,9 +444,9 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                 }
             }
 
-            if (mLeftLvParams.leftMargin == 0) {
+            if (mLeftMenuParams.leftMargin == 0) {
                 mMenuStatus = STATUS_MENU_SHOW;
-            } else if (mLeftLvParams.leftMargin == -mMenuWidth) {
+            } else if (mLeftMenuParams.leftMargin == -mMenuWidth) {
                 mMenuStatus = STATUS_MENU_HIDE;
             }
         }
