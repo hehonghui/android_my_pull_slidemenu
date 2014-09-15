@@ -32,12 +32,13 @@
 
 package com.uit.slidemenu;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -55,10 +56,12 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
      * 
      */
     private int mScreenWidth;
+
+    private int mScreenHeight;
     /**
      * 
      */
-    private MenuView mMenuView;
+    private View mMenuView;
 
     /**
      * 
@@ -75,7 +78,7 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     /**
      * 内容视图
      */
-    private TextView mContentView;
+    private View mContentView;
     /**
      * 
      */
@@ -114,6 +117,10 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
      * 
      */
     private int xDistance;
+    /**
+     * 
+     */
+    private float mMenuScale = 0.6f;
 
     /**
      * @param context
@@ -138,25 +145,28 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
     public SlideMenu(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        initLayout();
-    }
-
-    /**
-     * 
-     */
-    private void initLayout() {
         mScreenWidth = getContext().getResources().getDisplayMetrics().widthPixels;
-
+        mScreenHeight = getContext().getResources().getDisplayMetrics().heightPixels;
         mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        //
-        mMenuView = new MenuView(getContext());
+
         this.getViewTreeObserver().addOnGlobalLayoutListener(new
                 OnGlobalLayoutListener() {
 
                     @Override
                     public void onGlobalLayout() {
+
+                        if (mMenuView == null) {
+                            // default menu view
+                            SlideMenu.this.setMenuView(null);
+                        }
+
+                        if (mContentView == null) {
+                            // default menu view
+                            SlideMenu.this.setContentView(null);
+                        }
                         mLeftMenuParams = (MarginLayoutParams) mMenuView.getLayoutParams();
-                        mLeftMenuParams.width = (int) (mScreenWidth * 0.6f);
+                        mLeftMenuParams.width = (int) (mScreenWidth * mMenuScale);
+                        mLeftMenuParams.height = mScreenHeight;
                         // hide the menu view
                         mLeftMenuParams.leftMargin = -mLeftMenuParams.width;
                         mMenuView.setLayoutParams(mLeftMenuParams);
@@ -171,22 +181,87 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
                         SlideMenu.this.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     }
                 });
-        mMenuView.setId(123);
-        this.addView(mMenuView, 0);
+    }
 
+    /**
+     * @param menuLayout
+     */
+    public void setMenuView(int menuLayout) {
+        mMenuView = LayoutInflater.from(getContext()).inflate(menuLayout, this, false);
         //
-        mContentView = new TextView(getContext());
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        setMenuView(mMenuView);
+    }
+
+    /**
+     * @param menuLayout
+     */
+    public void setMenuView(View menuView) {
+        mMenuView = menuView;
+
+        if (mMenuView == null) {
+            mMenuView = new MenuView(getContext());
+        }
+
+        if (mMenuView.getId() == View.NO_ID) {
+            mMenuView.setId(123);
+        }
+        this.addView(mMenuView, 0);
+    }
+
+    /**
+     * 
+     */
+    public void setContentView(int contentLayout) {
+
+        mContentView = LayoutInflater.from(getContext()).inflate(contentLayout, this, false);
+        //
+        setContentView(mContentView);
+    }
+
+    /**
+     * @param menuView
+     * @param contentView
+     */
+    public void setContentView(View contentView) {
+
+        mContentView = contentView;
+        if (mContentView == null) {
+            mContentView = new TextView(getContext());
+        }
+        //
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mContentView
+                .getLayoutParams();
+        if (layoutParams == null) {
+            layoutParams = new RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+        }
         layoutParams.width = mScreenWidth;
-        mContentView.setText("这是Content View ");
-        mContentView.setGravity(Gravity.CENTER);
-        mContentView.setTextSize(30f);
         layoutParams.addRule(RelativeLayout.RIGHT_OF, mMenuView.getId());
         mContentView.setBackgroundColor(Color.CYAN);
-        this.addView(mContentView, layoutParams);
         mContentView.setOnTouchListener(this);
+
+        //
+        this.addView(mContentView, layoutParams);
+    }
+
+    /**
+     * @param activity
+     */
+    public void attachToActivity(Activity activity) {
+        if (activity != null) {
+            activity.getWindow().getDecorView().setOnTouchListener(this);
+            activity.setContentView(this);
+        }
+    }
+
+    /**
+     * @param scale
+     */
+    public void setMenuViewScale(float scale) {
+        if (scale > 0.0f && scale <= 1.0f) {
+            mMenuScale = scale;
+        }
     }
 
     /**
@@ -196,12 +271,12 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         mSlideMenuListener = listener;
     }
 
-    /**
-     * @param item
-     */
-    public void addMenuItem(MenuItem item) {
-        mMenuView.addMenuItem(item);
-    }
+    // /**
+    // * @param item
+    // */
+    // public void addMenuItem(MenuItem item) {
+    // mMenuView.addMenuItem(item);
+    // }
 
     /**
      * 
