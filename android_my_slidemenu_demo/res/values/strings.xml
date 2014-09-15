@@ -1,5 +1,7 @@
 <resources>
 
     <string name="app_name">android_my_slidemenu_demo</string>
+    <string name="show_menu"> 打开菜单</string>
+    <string name="close_menu">关闭菜单</string>
 
 </resources>

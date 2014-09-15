@@ -228,8 +228,8 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         if (mContentView == null) {
             mContentView = new TextView(getContext());
         }
-        
-        if ( mMenuView == null ) {
+
+        if (mMenuView == null) {
             setMenuView(null);
         }
         //
@@ -447,6 +447,13 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         if (mMenuStatus != STATUS_MENU_HIDE) {
             changeMenuViewMarginAsync(-mMenuWidth);
         }
+    }
+
+    /**
+     * @return
+     */
+    public boolean isMenuShowing() {
+        return mMenuStatus == STATUS_MENU_SHOW;
     }
 
     /**

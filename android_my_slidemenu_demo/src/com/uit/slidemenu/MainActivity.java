@@ -38,6 +38,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -94,15 +95,35 @@ public class MainActivity extends Activity {
         //
         // slideMenu.setContentView(textView);
 
+        //
         View contentView = LayoutInflater.from(this).inflate(R.layout.main, null);
+
+        contentView.findViewById(R.id.my_show_button).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                slideMenu.showMenu();
+            }
+        });
+        contentView.findViewById(R.id.my_close_button).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                slideMenu.hideMenu();
+            }
+        });
+        //
         ListView listView = (ListView) contentView.findViewById(R.id.my_listview);
         String[] items = new String[] {
                 "item - 1", "item - 1", "item - 1", "item - 1", "item - 1", "item - 1"
         };
 
-        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+                items));
+        //
         listView.setOnTouchListener(slideMenu);
-        
+
+        //
         slideMenu.setContentView(contentView);
         //
         slideMenu.attachToActivity(this);
