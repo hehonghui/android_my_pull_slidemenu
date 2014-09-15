@@ -228,6 +228,10 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         if (mContentView == null) {
             mContentView = new TextView(getContext());
         }
+        
+        if ( mMenuView == null ) {
+            setMenuView(null);
+        }
         //
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mContentView
                 .getLayoutParams();

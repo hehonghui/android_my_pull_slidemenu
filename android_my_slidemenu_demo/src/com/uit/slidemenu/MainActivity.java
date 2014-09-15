@@ -36,6 +36,10 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,15 +85,25 @@ public class MainActivity extends Activity {
         menu.setText("Menu View");
         menu.setBackgroundColor(Color.RED);
         //
-//        slideMenu.setMenuView(menu);
+        // slideMenu.setMenuView(menu);
 
         TextView textView = new TextView(this);
         textView.setTextSize(30);
         textView.setText("Content view");
         textView.setGravity(Gravity.CENTER);
         //
-//        slideMenu.setContentView(textView);
+        // slideMenu.setContentView(textView);
 
+        View contentView = LayoutInflater.from(this).inflate(R.layout.main, null);
+        ListView listView = (ListView) contentView.findViewById(R.id.my_listview);
+        String[] items = new String[] {
+                "item - 1", "item - 1", "item - 1", "item - 1", "item - 1", "item - 1"
+        };
+
+        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        listView.setOnTouchListener(slideMenu);
+        
+        slideMenu.setContentView(contentView);
         //
         slideMenu.attachToActivity(this);
 
