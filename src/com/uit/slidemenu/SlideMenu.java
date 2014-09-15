@@ -222,6 +222,11 @@ public class SlideMenu extends RelativeLayout implements OnTouchListener {
         int newLeftMargin = -mMenuWidth;
         // 计算新的left margin值
         if (xOffset > 0 && mLeftLvParams.leftMargin < 0) {
+
+            if (mLeftLvParams.leftMargin > -100 && xOffset < 200
+                    && mContentLayoutParams.rightMargin < -400) {
+                return;
+            }
             // left menu move to content region
             newLeftMargin += xOffset;
             // Content View move to right
