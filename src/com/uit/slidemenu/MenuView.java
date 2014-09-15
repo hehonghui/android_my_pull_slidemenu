@@ -115,21 +115,6 @@ public class MenuView extends RelativeLayout {
     /**
      * @author mrsimple
      */
-    public static interface OnSlideMenuListener {
-        /**
-         * 
-         */
-        public void onOpen();
-
-        /**
-         * 
-         */
-        public void onClose();
-    }
-
-    /**
-     * @author mrsimple
-     */
     class MenuItemAdapter extends BaseAdapter {
 
         @Override
