@@ -58,11 +58,6 @@ public class MenuView extends RelativeLayout {
     private List<MenuItem> mMenuItems = new ArrayList<MenuItem>();
 
     /**
-     * 
-     */
-    OnSlideMenuListener mSlideMenuListener;
-
-    /**
      * @param context
      */
     public MenuView(Context context) {
